@@ -9,7 +9,7 @@ import os
 import sys
 import json
 import yaml
-import smtplib
+import base64
 from pathlib import Path
 from datetime import datetime
 from email.mime.text import MIMEText
@@ -19,6 +19,10 @@ import requests
 from notion_client import Client
 import time
 import pytz
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from googleapiclient.discovery import build
 
 # Force UTF-8 encoding on Windows
 if sys.platform == 'win32':
@@ -60,10 +64,8 @@ def load_config() -> Dict:
         'NOTION_TOKEN': os.environ.get('NOTION_TOKEN', ''),
         'NOTION_PARENT_PAGE_ID': os.environ.get('NOTION_PARENT_PAGE_ID', ''),
         'NOTIFICATION_EMAIL': os.environ.get('NOTIFICATION_EMAIL', ''),
-        'SMTP_SERVER': os.environ.get('SMTP_SERVER', ''),
-        'SMTP_PORT': os.environ.get('SMTP_PORT', '587'),
-        'SMTP_USERNAME': os.environ.get('SMTP_USERNAME', ''),
-        'SMTP_PASSWORD': os.environ.get('SMTP_PASSWORD', ''),
+        'GOOGLE_CREDENTIALS_JSON': os.environ.get('GOOGLE_CREDENTIALS_JSON', ''),
+        'GOOGLE_OAUTH_TOKEN_JSON': os.environ.get('GOOGLE_OAUTH_TOKEN_JSON', ''),
     }
 
     # Valider les secrets requis (Perplexity + Notion minimum)
@@ -72,13 +74,13 @@ def load_config() -> Dict:
     if missing:
         raise ValueError(f"Secrets manquants: {', '.join(missing)}")
 
-    # Vérifier SMTP seulement si notifications activées
+    # Vérifier Gmail API seulement si notifications activées
     notifications_enabled = config.get('general', {}).get('notifications', {}).get('enabled', False)
     if notifications_enabled:
-        smtp_required = ['NOTIFICATION_EMAIL', 'SMTP_SERVER', 'SMTP_USERNAME', 'SMTP_PASSWORD']
-        missing_smtp = [s for s in smtp_required if not config['secrets'].get(s)]
-        if missing_smtp:
-            print(f'ATTENTION: Notifications activées mais secrets SMTP manquants: {", ".join(missing_smtp)}')
+        gmail_required = ['NOTIFICATION_EMAIL', 'GOOGLE_CREDENTIALS_JSON', 'GOOGLE_OAUTH_TOKEN_JSON']
+        missing_gmail = [s for s in gmail_required if not config['secrets'].get(s)]
+        if missing_gmail:
+            print(f'ATTENTION: Notifications activées mais secrets Gmail manquants: {", ".join(missing_gmail)}')
             print('Les notifications email seront désactivées.')
             config['general']['notifications']['enabled'] = False
 
@@ -408,35 +410,72 @@ def create_notion_page(title: str, content: str, parent_page_id: str,
         return None
 
 
+# ==================== GMAIL API ====================
+
+GMAIL_SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+
+
+def get_gmail_service(config: Dict):
+    """Initialise le service Gmail API avec les credentials OAuth2"""
+    creds_json = config['secrets']['GOOGLE_CREDENTIALS_JSON']
+    token_json = config['secrets']['GOOGLE_OAUTH_TOKEN_JSON']
+
+    if not creds_json or not token_json:
+        raise ValueError('Credentials Gmail API manquantes')
+
+    # Charger le token OAuth2 depuis le secret
+    token_data = json.loads(token_json)
+    creds = Credentials.from_authorized_user_info(token_data, GMAIL_SCOPES)
+
+    # Rafraîchir le token si expiré
+    if creds and creds.expired and creds.refresh_token:
+        print('  Rafraîchissement du token Gmail...')
+        creds.refresh(Request())
+
+    service = build('gmail', 'v1', credentials=creds, cache_discovery=False)
+    return service
+
+
+def send_gmail(service, to_email: str, subject: str, text_body: str, html_body: str) -> bool:
+    """Envoie un email via l'API Gmail"""
+    msg = MIMEMultipart('alternative')
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
+    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode('utf-8')
+    service.users().messages().send(
+        userId='me',
+        body={'raw': raw}
+    ).execute()
+
+    return True
+
+
 # ==================== EMAIL NOTIFICATIONS ====================
 
 def send_notification_email(prompt_key: str, synthesis: str, page_title: str,
                             config: Dict) -> bool:
-    """Envoie un email de notification avec le résumé"""
+    """Envoie un email de notification avec le résumé via Gmail API"""
 
     # Vérifier si les notifications sont activées
     if not config.get('general', {}).get('notifications', {}).get('enabled', False):
         print('  Notifications email désactivées')
         return True
 
-    print('  Envoi de l\'email de notification...')
+    print('  Envoi de l\'email de notification (Gmail API)...')
 
     to_email = config['secrets']['NOTIFICATION_EMAIL']
-    smtp_server = config['secrets']['SMTP_SERVER']
-    smtp_port = int(config['secrets']['SMTP_PORT'])
-    smtp_user = config['secrets']['SMTP_USERNAME']
-    smtp_pass = config['secrets']['SMTP_PASSWORD']
-
-    if not all([smtp_server, smtp_user, smtp_pass, to_email]):
-        print('  Configuration SMTP incomplète, notification ignorée')
+    if not to_email:
+        print('  NOTIFICATION_EMAIL non configuré, notification ignorée')
         return False
 
     try:
-        # Créer le message
-        msg = MIMEMultipart('alternative')
-        msg['From'] = smtp_user
-        msg['To'] = to_email
-        msg['Subject'] = f'Healthcare Watch - {page_title}'
+        service = get_gmail_service(config)
+
+        subject = f'Healthcare Watch - {page_title}'
 
         # Contenu texte
         text = f"""Bonjour,
@@ -450,8 +489,7 @@ Synthèse:
 Healthcare Watch - Newsletter automatisée
 """
 
-        # Contenu HTML
-        # Échapper le contenu pour éviter les injections HTML
+        # Contenu HTML (échappement pour éviter les injections)
         safe_synthesis = synthesis.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
         html = f"""<html><body>
 <h2>Rapport généré avec succès</h2>
@@ -462,17 +500,8 @@ Healthcare Watch - Newsletter automatisée
 <p style="color: #888; font-size: 0.9em;"><em>Healthcare Watch - Newsletter automatisée</em></p>
 </body></html>"""
 
-        part1 = MIMEText(text, 'plain', 'utf-8')
-        part2 = MIMEText(html, 'html', 'utf-8')
-        msg.attach(part1)
-        msg.attach(part2)
-
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
-
-        print('  Email envoyé')
+        send_gmail(service, to_email, subject, text, html)
+        print('  Email envoyé via Gmail API')
         return True
 
     except Exception as e:
@@ -481,24 +510,18 @@ Healthcare Watch - Newsletter automatisée
 
 
 def send_error_email(prompt_key: str, error_msg: str, config: Dict) -> bool:
-    """Envoie un email de notification en cas d'erreur"""
+    """Envoie un email de notification en cas d'erreur via Gmail API"""
     if not config.get('general', {}).get('notifications', {}).get('email_on_error', False):
         return True
 
     to_email = config['secrets'].get('NOTIFICATION_EMAIL', '')
-    smtp_server = config['secrets'].get('SMTP_SERVER', '')
-    smtp_user = config['secrets'].get('SMTP_USERNAME', '')
-    smtp_pass = config['secrets'].get('SMTP_PASSWORD', '')
-    smtp_port = int(config['secrets'].get('SMTP_PORT', '587'))
-
-    if not all([smtp_server, smtp_user, smtp_pass, to_email]):
+    if not to_email:
         return False
 
     try:
-        msg = MIMEMultipart('alternative')
-        msg['From'] = smtp_user
-        msg['To'] = to_email
-        msg['Subject'] = f'[ERREUR] Healthcare Watch - {prompt_key}'
+        service = get_gmail_service(config)
+
+        subject = f'[ERREUR] Healthcare Watch - {prompt_key}'
 
         text = f"""Bonjour,
 
@@ -509,13 +532,16 @@ Erreur: {error_msg}
 ---
 Healthcare Watch - Newsletter automatisée
 """
-        msg.attach(MIMEText(text, 'plain', 'utf-8'))
 
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_pass)
-            server.send_message(msg)
+        html = f"""<html><body>
+<h2 style="color: #c0392b;">Erreur Healthcare Watch</h2>
+<p>Une erreur s'est produite lors de la génération de <strong>{prompt_key}</strong>.</p>
+<pre style="background-color: #fdf2f2; padding: 15px; border-radius: 5px;">{error_msg}</pre>
+<hr>
+<p style="color: #888; font-size: 0.9em;"><em>Healthcare Watch - Newsletter automatisée</em></p>
+</body></html>"""
 
+        send_gmail(service, to_email, subject, text, html)
         print(f'  Email d\'erreur envoyé pour {prompt_key}')
         return True
     except Exception:
