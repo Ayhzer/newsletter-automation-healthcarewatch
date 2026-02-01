@@ -584,18 +584,29 @@ def main():
                     print(f'  Fréquence {freq} non atteinte, skip')
                     continue
 
-                # 1. Interroger Perplexity
-                prompt_text = prompt_config.get('prompt', '')
-                options = prompt_config.get('options', {})
-
-                synthesis = query_perplexity(prompt_text, config, options)
-
-                # 2. Créer la page Notion
+                # 0. Vérifier l'accès Notion AVANT d'appeler Perplexity
                 page_title = prompt_config.get('page_title', f'Rapport {prompt_key}')
                 parent_id = prompt_config.get('parent_page_id') or config['secrets'].get('NOTION_PARENT_PAGE_ID')
 
                 if not parent_id:
                     raise ValueError(f'parent_page_id non défini pour {prompt_key}')
+
+                print(f'  Vérification accès Notion ({parent_id[:8]}...)...')
+                notion = Client(auth=config['secrets']['NOTION_TOKEN'])
+                try:
+                    notion.pages.retrieve(page_id=parent_id)
+                    print(f'  Page Notion accessible')
+                except Exception as e:
+                    raise ValueError(
+                        f'Page Notion inaccessible ({parent_id}). '
+                        f'Vérifiez que l\'intégration est connectée à la page. Erreur: {e}'
+                    )
+
+                # 1. Interroger Perplexity
+                prompt_text = prompt_config.get('prompt', '')
+                options = prompt_config.get('options', {})
+
+                synthesis = query_perplexity(prompt_text, config, options)
 
                 page_id = create_notion_page(page_title, synthesis, parent_id, config)
 
