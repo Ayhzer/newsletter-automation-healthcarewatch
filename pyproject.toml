@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "healthcare-watch"
+version = "1.0.0"
+description = "Automatisation de newsletters sanitaires avec Perplexity et Notion"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Healthcare Watch", email = ""}
+]
+
+dependencies = [
+    "requests>=2.28.0",
+    "pyyaml>=6.0",
+    "notion-client>=2.0.0",
+    "pytz>=2023.3",
+]
+
+[project.scripts]
+healthcare-watch = "healthcare_watch.healthcare_watch:main"

@@ -1,0 +1,79 @@
+name: Healthcare Watch - Newsletter Sanitaire
+
+on:
+  # Planification quotidienne
+  schedule:
+    # Chaque jour à 08:00 UTC (10:00 CET)
+    - cron: '0 8 * * *'
+    # Exécution supplémentaire à 16:00 UTC (18:00 CET) pour les updates
+    - cron: '0 16 * * *'
+  
+  # Trigger manuel
+  workflow_dispatch:
+
+jobs:
+  healthcare-watch:
+    name: Générer newsletters sanitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      # 1. Checkout du code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      # 2. Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      # 3. Installer les dépendances
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # 4. Exécuter le script principal
+      - name: Run Healthcare Watch
+        env:
+          # Secrets Perplexity & Notion
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE_ID: ${{ secrets.NOTION_PARENT_PAGE_ID }}
+          
+          # Notifications email
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        
+        run: |
+          cd src/healthcare_watch
+          python healthcare_watch.py
+      
+      # 5. Commit les changements de suivi (optionnel)
+      - name: Commit execution log
+        if: always()
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Ajouter les fichiers de suivi (optionnel)
+          if [ -f "data/output/.last_run.json" ]; then
+            git add data/output/.last_run.json
+            git commit -m "📊 Update execution log - $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || true
+            git push || true
+          fi
+      
+      # 6. Notification en cas d'erreur (optionnel)
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('❌ Healthcare Watch execution failed');
