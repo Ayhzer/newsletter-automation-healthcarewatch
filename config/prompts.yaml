@@ -22,7 +22,7 @@ prompts:
     enabled: true
     
     # Fréquence d'exécution: daily, weekly, monthly, etc.
-    frequency: "daily"
+    frequency: "weekly"
     
     # Heure d'exécution (format 24h, HH:MM) - optionnel, défaut: 08:00
     # time_of_day: "08:00"
