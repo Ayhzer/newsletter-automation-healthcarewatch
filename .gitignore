@@ -40,7 +40,7 @@ env/
 .env
 .env.local
 config/config.py
-config/prompts.yaml
+# config/prompts.yaml is tracked - it contains no secrets
 
 # Output & Logs
 data/output/*.txt
