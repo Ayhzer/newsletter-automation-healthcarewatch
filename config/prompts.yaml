@@ -28,71 +28,60 @@ prompts:
   # Newsletter quotidienne - Actualités Santé
   daily_health_news:
     enabled: true
-    frequency: "daily"
-    page_title: "Veille Sanitaire Quotidienne"
+    frequency: "weekly"
+    page_title: "veille réglementaire hebdo IT santé"
     parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
     prompt: |
-      Tu es un expert en veille sanitaire qui synthétise l'actualité médicale et de santé publique.
-
-      Récupère et synthétise les dernières actualités médicales et de santé publique avec les éléments suivants:
-
-      ## STRUCTURE DEMANDÉE:
-      1. **Les 5 principales actualités du jour** avec sources
-      2. **Tendances santé émergentes** (changements importants identifiés)
-      3. **Statistiques ou données clés** (épidémiologie, santé publique)
-      4. **Impact sur les professionnels de santé** (si applicable)
-      5. **Recommandations officielles** (OMS, autorités sanitaires)
-
-      Sois factuel, cite les sources, et rends accessible pour un professionnel de santé.
+     Synthèse veille réglementaire hebdo IT santé France : HDS, PGSSI-S, RNIV, LAP, EHDS NIS2 et autres dispositifs. 
     options:
       max_tokens: 2000
       temperature: 0.3
       model: "sonar"
 
-  # Newsletter hebdomadaire - Innovations Tech Santé
-  weekly_health_tech:
-    enabled: true
-    frequency: "weekly"
-    page_title: "Innovations Technologiques en Santé"
-    parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
-    prompt: |
-      Tu es expert en digital health et technologie médicale.
+#   # Newsletter hebdomadaire - Innovations Tech Santé
+#   weekly_health_tech:
+#     enabled: true
+#     frequency: "weekly"
+#     page_title: "Innovations Technologiques en Santé"
+#     parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
+#     prompt: |
+#       Tu es expert en digital health et technologie médicale.
 
-      Compile une veille technologique hebdomadaire sur les innovations en santé avec:
+#       Compile une veille technologique hebdomadaire sur les innovations en santé avec:
 
-      ## STRUCTURE DEMANDÉE:
-      1. **Technologies émergentes** (IA, blockchain, IoT santé, télémédecine)
-      2. **Startups de santé** (nouveaux financements, levées de fonds)
-      3. **Avancées en cybersécurité médicale** (protections données patient)
-      4. **Réglementations digitales** (RGPD, conformité IT santé)
-      5. **Cas d'usage pratiques** (implémentations réussies)
+#       ## STRUCTURE DEMANDÉE:
+#       1. **Technologies émergentes** (IA, blockchain, IoT santé, télémédecine)
+#       2. **Startups de santé** (nouveaux financements, levées de fonds)
+#       3. **Avancées en cybersécurité médicale** (protections données patient)
+#       4. **Réglementations digitales** (RGPD, conformité IT santé)
+#       5. **Cas d'usage pratiques** (implémentations réussies)
 
-      Format: utilise des bullets pour la clarté, cite les sources.
-    options:
-      max_tokens: 2500
-      temperature: 0.3
-      model: "sonar"
+#       Format: utilise des bullets pour la clarté, cite les sources.
+#     options:
+#       max_tokens: 2500
+#       temperature: 0.3
+#       model: "sonar"
 
-  # Newsletter mensuelle - Études Cliniques
-  monthly_clinical_research:
-    enabled: true
-    frequency: "monthly"
-    page_title: "Synthèse Mensuelle - Études Cliniques et Recherche"
-    parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
-    prompt: |
-      Tu es expert en recherche clinique et médecine factuelle.
+#   # Newsletter mensuelle - Études Cliniques
+#   monthly_clinical_research:
+#     enabled: true
+#     frequency: "monthly"
+#     page_title: "Synthèse Mensuelle - Études Cliniques et Recherche"
+#     parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
+#     prompt: |
+#       Tu es expert en recherche clinique et médecine factuelle.
 
-      Crée une synthèse mensuelle des études cliniques importantes avec:
+#       Crée une synthèse mensuelle des études cliniques importantes avec:
 
-      ## STRUCTURE DEMANDÉE:
-      1. **Études marquantes du mois** (nouvelles découvertes majeures)
-      2. **Méta-analyses et revues systématiques** (synthèses de preuves)
-      3. **Essais cliniques en cours** (phases I-IV pertinents)
-      4. **Impact sur les pratiques cliniques** (implications pour la pratique)
-      5. **Publications d'agences réglementaires** (EMA, FDA, HAS)
+#       ## STRUCTURE DEMANDÉE:
+#       1. **Études marquantes du mois** (nouvelles découvertes majeures)
+#       2. **Méta-analyses et revues systématiques** (synthèses de preuves)
+#       3. **Essais cliniques en cours** (phases I-IV pertinents)
+#       4. **Impact sur les pratiques cliniques** (implications pour la pratique)
+#       5. **Publications d'agences réglementaires** (EMA, FDA, HAS)
 
-      Réserve des sections pour: niveau de preuve, population étudiée, résultats clés.
-    options:
-      max_tokens: 3000
-      temperature: 0.2
-      model: "sonar"
+#       Réserve des sections pour: niveau de preuve, population étudiée, résultats clés.
+#     options:
+#       max_tokens: 3000
+#       temperature: 0.2
+#       model: "sonar"
