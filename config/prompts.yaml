@@ -33,7 +33,7 @@ prompts:
     page_title: "veille réglementaire hebdo IT santé"
     parent_page_id: "2f972b81f9ed808cba5ae854c51f6b2b"
     prompt: |
-     Synthèse veille réglementaire hebdo IT santé France : HDS, PGSSI-S, RNIV, LAP, EHDS NIS2 et autres dispositifs. 
+     Synthèse très détaillée de veille réglementaire hebdo IT santé France : HDS, PGSSI-S, RNIV, LAP, EHDS NIS2 et autres dispositifs. Format bien lisible et compréhensible pour intégrer sur une page Notion.
     options:
       max_tokens: 2000
       temperature: 0.3
