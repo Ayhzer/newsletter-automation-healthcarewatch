@@ -343,7 +343,7 @@ Les notifications sont désactivées automatiquement si les credentials Gmail AP
 
 Chaque exécution crée une **nouvelle page Notion** avec:
 
-- ✅ Titre avec timestamp: `"Titre (15 January 2024 - 10:30)"`
+- ✅ Titre avec timestamp: `"Titre (15/01/2024 - 10:30)"`
 - ✅ Date/heure de génération
 - ✅ Contenu structuré de Perplexity
 - ✅ Sous la page parent spécifiée

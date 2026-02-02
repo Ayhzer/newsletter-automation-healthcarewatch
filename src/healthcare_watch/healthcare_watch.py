@@ -376,10 +376,10 @@ def create_notion_page(title: str, content: str, parent_page_id: str,
 
     notion = Client(auth=config['secrets']['NOTION_TOKEN'])
 
-    # Formater la date/heure avec timezone
+    # Formater la date/heure avec timezone (format français: jj/mm/aaaa - HH:MM)
     tz = pytz.timezone(config.get('general', {}).get('timezone', 'Europe/Paris'))
     now_tz = datetime.now(tz)
-    timestamp = now_tz.strftime('%d %B %Y - %H:%M')
+    timestamp = now_tz.strftime('%d/%m/%Y - %H:%M')
 
     # Titre avec timestamp
     full_title = f"{title} ({timestamp})"

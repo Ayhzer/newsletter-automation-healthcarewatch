@@ -240,7 +240,7 @@ Vous devriez voir:
 1. Ouvrir Notion
 2. Aller à la page "Healthcare Watch"
 3. Vous devriez voir une nouvelle page enfant avec:
-   - Titre: "Actualités du Jour (15 January 2024 - 10:30)"
+   - Titre: "Actualités du Jour (15/01/2024 - 10:30)"
    - Contenu structuré de Perplexity
    - Timestamp
 
