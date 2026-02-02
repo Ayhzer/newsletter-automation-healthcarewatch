@@ -10,7 +10,6 @@ general:
   # Notifications par email
   notifications:
     enabled: true
-    include_summary: true  # Inclure le résumé dans l'email
     email_on_error: true   # Envoyer un email si erreur
 
 # ==================== DÉFINITION DES PROMPTS ====================
@@ -83,7 +82,7 @@ prompts:
   monthly_clinical_research:
     enabled: true
     frequency: "monthly"
-    page_title: "Synthèse Mensulle - Études Cliniques et Recherche"
+    page_title: "Synthèse Mensuelle - Études Cliniques et Recherche"
     parent_page_id: ""
     prompt: |
       Tu es expert en recherche clinique et médecine factuelle.
@@ -108,14 +107,12 @@ prompts:
 # ou dans GitHub Secrets (voir ci-dessous):
 #
 # Variables d'environnement requises:
-#   PERPLEXITY_API_KEY        - Clé API Perplexity
-#   NOTION_TOKEN              - Token API Notion
-#   NOTION_PARENT_PAGE_ID     - ID de la page Notion racine (optionnel si défini par prompt)
-#   NOTIFICATION_EMAIL        - Email pour les notifications
-#   SMTP_SERVER               - Serveur SMTP (ex: smtp.gmail.com)
-#   SMTP_PORT                 - Port SMTP (ex: 587)
-#   SMTP_USERNAME             - Utilisateur SMTP
-#   SMTP_PASSWORD             - Mot de passe SMTP
+#   PERPLEXITY_API_KEY          - Clé API Perplexity
+#   NOTION_TOKEN                - Token API Notion
+#   NOTION_PARENT_PAGE_ID       - ID de la page Notion racine (optionnel si défini par prompt)
+#   NOTIFICATION_EMAIL          - Email pour les notifications (adresse Gmail)
+#   GOOGLE_CREDENTIALS_JSON     - Contenu JSON du fichier credentials.json (Google Cloud Console)
+#   GOOGLE_OAUTH_TOKEN_JSON     - Contenu JSON du fichier token.json (généré après autorisation OAuth2)
 #
 # Configuration GitHub Secrets (pour CI/CD):
 #   Ajouter dans Settings → Secrets and variables → Actions:
@@ -123,7 +120,8 @@ prompts:
 #   - NOTION_TOKEN
 #   - NOTION_PARENT_PAGE_ID
 #   - NOTIFICATION_EMAIL
-#   - SMTP_SERVER
-#   - SMTP_PORT
-#   - SMTP_USERNAME
-#   - SMTP_PASSWORD
+#   - GOOGLE_CREDENTIALS_JSON
+#   - GOOGLE_OAUTH_TOKEN_JSON
+#
+# Note: L'application utilise Gmail API (OAuth2) pour l'envoi d'emails.
+# Voir la documentation pour configurer les credentials Google Cloud.

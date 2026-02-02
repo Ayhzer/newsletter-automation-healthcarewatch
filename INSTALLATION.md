@@ -47,35 +47,41 @@ NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxxxx
 NOTION_PARENT_PAGE_ID=xxxxxxxxxxxxxxxxxxxxx
 ```
 
-### 1.4 Email et SMTP
+### 1.4 Gmail API (OAuth2)
 
-#### Pour Gmail:
+Pour envoyer des emails de notification, l'application utilise Gmail API avec OAuth2.
 
-1. Activer l'authentification à deux facteurs: https://myaccount.google.com/security
-2. Aller à: https://myaccount.google.com/apppasswords
-3. Sélectionner "Mail" et "Windows Computer"
-4. Copier le mot de passe généré (16 caractères)
+#### Étapes de configuration:
+
+1. **Créer un projet Google Cloud Console**
+   - Aller à: https://console.cloud.google.com/
+   - Créer un nouveau projet: "Healthcare Watch"
+
+2. **Activer Gmail API**
+   - Dans le projet, aller à "APIs & Services → Library"
+   - Rechercher "Gmail API"
+   - Cliquer "Enable"
+
+3. **Créer des credentials OAuth 2.0**
+   - Aller à "APIs & Services → Credentials"
+   - Cliquer "Create Credentials → OAuth client ID"
+   - Type d'application: "Desktop app"
+   - Télécharger le fichier `credentials.json`
+
+4. **Générer le token OAuth2**
+   - Exécuter un script Python pour autoriser l'application
+   - Un navigateur s'ouvrira pour l'autorisation
+   - Le fichier `token.json` sera généré
+
+5. **Configuration des variables d'environnement**
 
 ```
 NOTIFICATION_EMAIL=votreemail@gmail.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votreemail@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","project_id":"...","auth_uri":"...","token_uri":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","token_uri":"...","client_id":"...","client_secret":"...",...}
 ```
 
-#### Pour Outlook/Hotmail:
-
-```
-SMTP_SERVER=smtp-mail.outlook.com
-SMTP_PORT=587
-SMTP_USERNAME=votreemail@outlook.com
-SMTP_PASSWORD=votre_mot_de_passe
-```
-
-#### Pour un autre provider:
-
-Trouver les paramètres SMTP sur le site du provider.
+**Note**: Copiez le contenu JSON complet de chaque fichier (credentials.json et token.json) dans les variables d'environnement correspondantes.
 
 ## 🚀 Étape 2: Installation locale
 
@@ -119,10 +125,8 @@ PERPLEXITY_API_KEY=pplx-xxxxxxxxxxxxxxxxxxxxx
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxx
 NOTION_PARENT_PAGE_ID=xxxxxxxxxxxxxxxxxxxxx
 NOTIFICATION_EMAIL=votre.email@gmail.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votre.email@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
 
 ### 3.2 Charger les variables d'environnement
@@ -262,10 +266,8 @@ git push -u origin main
 | `NOTION_TOKEN` | `ntn_...` |
 | `NOTION_PARENT_PAGE_ID` | `xxxxx...` |
 | `NOTIFICATION_EMAIL` | `votre@email.com` |
-| `SMTP_SERVER` | `smtp.gmail.com` |
-| `SMTP_PORT` | `587` |
-| `SMTP_USERNAME` | `votre@email.com` |
-| `SMTP_PASSWORD` | `xxxx xxxx xxxx xxxx` |
+| `GOOGLE_CREDENTIALS_JSON` | `{"installed":{...}}` |
+| `GOOGLE_OAUTH_TOKEN_JSON` | `{"token":"...",...}` |
 
 ### 6.3 Vérifier les Actions
 
@@ -329,23 +331,18 @@ echo $NOTION_TOKEN
 ### Problème: Email non envoyé
 
 ```bash
-# Pour Gmail, vérifier:
-# 1. Authentification 2FA activée
-# 2. App password généré (pas le mot de passe du compte)
-# 3. SMTP_PASSWORD = app password exact
+# Pour Gmail API, vérifier:
+# 1. Gmail API activée dans Google Cloud Console
+# 2. credentials.json et token.json correctement configurés
+# 3. GOOGLE_CREDENTIALS_JSON et GOOGLE_OAUTH_TOKEN_JSON contiennent le JSON complet
+# 4. Token OAuth2 valide (le code rafraîchit automatiquement si possible)
 
-# Tester:
-python -c "
-import smtplib
-smtp = smtplib.SMTP('smtp.gmail.com', 587)
-smtp.starttls()
-try:
-    smtp.login('votre@gmail.com', 'votre_app_password')
-    print('✅ Connexion SMTP OK')
-except:
-    print('❌ Authentification échouée')
-smtp.quit()
-"
+# Vérifier les variables d'environnement:
+echo $GOOGLE_CREDENTIALS_JSON
+echo $GOOGLE_OAUTH_TOKEN_JSON
+
+# Vérifier dans les logs du script pour voir les erreurs spécifiques
+# Le script affichera des messages d'erreur détaillés en cas de problème d'authentification
 ```
 
 ## 📱 Conseils d'usage

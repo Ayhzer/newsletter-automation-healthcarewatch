@@ -8,7 +8,7 @@
 - ✅ **Fréquences flexibles**: quotidienne, hebdomadaire, mensuelle ou autre
 - ✅ **Intégration Perplexity AI**: Synthèses intelligentes en temps réel
 - ✅ **Pages Notion automatisées**: Création de pages avec titre, date et heure-minute
-- ✅ **Notifications email**: Récapitulatif avec option désactivation
+- ✅ **Notifications email**: Récapitulatif via Gmail API (OAuth2)
 - ✅ **Configuration simple**: Fichier YAML facile à éditer
 - ✅ **GitHub Actions ready**: Planification automatique dans le cloud
 - ✅ **Pas de secrets**: Configuration non-sensible en YAML
@@ -73,11 +73,9 @@ Créer un fichier `.env` à la racine :
 PERPLEXITY_API_KEY=pplx-xxxxxxxxxxxxxxxxxxxxx
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxx
 NOTION_PARENT_PAGE_ID=xxxxxxxxxxxxxxxxxxxxx
-NOTIFICATION_EMAIL=votre.email@example.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votre.email@example.com
-SMTP_PASSWORD=votre_password_app
+NOTIFICATION_EMAIL=votre.email@gmail.com
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
 
 ### 5️⃣ Configurer les prompts
@@ -117,7 +115,7 @@ general:
   timezone: "Europe/Paris"  # Fuseau horaire
   notifications:
     enabled: true           # Activer/désactiver les emails
-    email_on_error: true    # Email en cas d'erreur
+    email_on_error: true    # Email en cas d'erreur via Gmail API
 
 prompts:
   nom_du_prompt:
@@ -140,7 +138,6 @@ general:
   timezone: "Europe/Paris"
   notifications:
     enabled: true
-    include_summary: true
     email_on_error: true
 
 prompts:
@@ -180,20 +177,23 @@ NOTION_PARENT_PAGE_ID=xxxxx
 2. Copier le token (Bearer token)
 3. Obtenir l'ID de la page: Ouvrir Notion, copier l'URL, l'ID est après `/share/`
 
-### Email (SMTP)
+### Email (Gmail API OAuth2)
 
 ```
-NOTIFICATION_EMAIL=votre.email@example.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votre.email@example.com
-SMTP_PASSWORD=votre_password_app  # App password, pas votre mot de passe
+NOTIFICATION_EMAIL=votre.email@gmail.com
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
 
-Pour Gmail:
-1. Activer l'authentification à deux facteurs
-2. Générer un "App password": https://myaccount.google.com/apppasswords
-3. Utiliser ce mot de passe dans SMTP_PASSWORD
+Configuration Gmail API:
+1. Créer un projet Google Cloud Console: https://console.cloud.google.com/
+2. Activer Gmail API
+3. Créer des credentials OAuth 2.0 (type "Desktop app")
+4. Télécharger le fichier `credentials.json`
+5. Exécuter le script d'autorisation OAuth2 pour générer `token.json`
+6. Copier le contenu JSON complet de chaque fichier dans les variables d'environnement
+
+Voir la documentation pour plus de détails sur la configuration OAuth2.
 
 ## 🚀 GitHub Actions - Planification automatique
 
@@ -205,10 +205,8 @@ Pour Gmail:
    - `NOTION_TOKEN`
    - `NOTION_PARENT_PAGE_ID`
    - `NOTIFICATION_EMAIL`
-   - `SMTP_SERVER`
-   - `SMTP_PORT`
-   - `SMTP_USERNAME`
-   - `SMTP_PASSWORD`
+   - `GOOGLE_CREDENTIALS_JSON`
+   - `GOOGLE_OAUTH_TOKEN_JSON`
 
 ### 2. Le workflow s'exécutera automatiquement
 
@@ -282,9 +280,11 @@ echo $NOTION_TOKEN
 
 ### Email non envoyé
 
-Vérifier la configuration SMTP:
-- Gmail: Utiliser "App password", pas le mot de passe du compte
-- D'autres providers: Vérifier le server/port (SMTP2GO: smtp.smtp2go.com:2525)
+Vérifier la configuration Gmail API:
+- Vérifier que GOOGLE_CREDENTIALS_JSON et GOOGLE_OAUTH_TOKEN_JSON sont correctement configurés
+- Vérifier que Gmail API est activée dans Google Cloud Console
+- Vérifier que le token OAuth2 n'est pas expiré (le code rafraîchit automatiquement si possible)
+- Vérifier les logs pour voir les erreurs spécifiques
 
 ## 📚 Exemples de prompts
 
@@ -337,7 +337,7 @@ general:
     enabled: false  # Désactiver tous les emails
 ```
 
-Ou pour un prompt spécifique, ne pas inclure le SMTP_PASSWORD.
+Les notifications sont désactivées automatiquement si les credentials Gmail API ne sont pas configurés.
 
 ## 🔄 Cycle de vie des pages Notion
 

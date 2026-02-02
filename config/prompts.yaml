@@ -6,8 +6,9 @@
 general:
   timezone: "Europe/Paris"
 
-  # Notifications par email
+  # Notifications par email (Gmail API OAuth2)
   # Mettre enabled: false pour désactiver complètement les emails
+  # Requiert: GOOGLE_CREDENTIALS_JSON et GOOGLE_OAUTH_TOKEN_JSON
   notifications:
     enabled: true
     email_on_error: true
@@ -85,3 +86,17 @@ prompts:
 #       max_tokens: 3000
 #       temperature: 0.2
 #       model: "sonar"
+
+# ==================== VARIABLES D'ENVIRONNEMENT REQUISES ====================
+# Les secrets suivants doivent être définis en variables d'environnement (.env)
+# ou dans GitHub Secrets pour CI/CD:
+#
+#   PERPLEXITY_API_KEY          - Clé API Perplexity
+#   NOTION_TOKEN                - Token API Notion
+#   NOTION_PARENT_PAGE_ID       - ID de la page Notion racine (optionnel si défini par prompt)
+#   NOTIFICATION_EMAIL          - Email Gmail pour les notifications
+#   GOOGLE_CREDENTIALS_JSON     - Contenu JSON du fichier credentials.json (Google Cloud Console)
+#   GOOGLE_OAUTH_TOKEN_JSON     - Contenu JSON du fichier token.json (généré après autorisation OAuth2)
+#
+# Note: L'application utilise Gmail API (OAuth2) pour l'envoi d'emails.
+# Voir la documentation pour configurer les credentials Google Cloud.

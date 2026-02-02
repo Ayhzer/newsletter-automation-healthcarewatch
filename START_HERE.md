@@ -44,11 +44,9 @@ Créer fichier `.env` à la racine:
 PERPLEXITY_API_KEY=pplx-xxxxxxxxxxxxxxxxxxxxx
 NOTION_TOKEN=ntn_xxxxxxxxxxxxxxxxxxxxx
 NOTION_PARENT_PAGE_ID=xxxxxxxxxxxxxxxxxxxxx
-NOTIFICATION_EMAIL=votre@email.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votre@email.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+NOTIFICATION_EMAIL=votre@gmail.com
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
 
 **Où obtenir les valeurs? Voir section "Secrets" ci-dessous**
@@ -138,32 +136,25 @@ Juste votre email! Exemple: `votre.email@gmail.com`
 
 ---
 
-### 5. SMTP (Email)
+### 5. Gmail API (OAuth2)
 
-#### Si vous utilisez Gmail:
+Pour envoyer des emails, l'application utilise Gmail API avec OAuth2.
 
-1. Aller à: https://myaccount.google.com/security
-2. Activer "2-Step Verification" si pas fait
-3. Aller à: https://myaccount.google.com/apppasswords
-4. Sélectionner "Mail" + "Windows Computer"
-5. Google génère un mot de passe → Copier (16 chars)
+**Configuration rapide:**
 
-Alors:
-```
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=votre@gmail.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx  # Le mot de passe généré
-```
-
-#### Si vous utilisez Outlook:
+1. Créer un projet Google Cloud Console: https://console.cloud.google.com/
+2. Activer Gmail API
+3. Créer credentials OAuth 2.0 (type "Desktop app")
+4. Télécharger `credentials.json`
+5. Exécuter l'autorisation OAuth2 pour générer `token.json`
+6. Copier le contenu JSON complet de chaque fichier:
 
 ```
-SMTP_SERVER=smtp-mail.outlook.com
-SMTP_PORT=587
-SMTP_USERNAME=votre@outlook.com
-SMTP_PASSWORD=votre_mot_de_passe_outlook
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
+
+**Voir INSTALLATION.md pour les instructions détaillées**
 
 ---
 
@@ -185,9 +176,9 @@ Quand vous lancez le script:
 Quand vous êtes prêt:
 
 1. Créer un repository GitHub
-2. Ajouter 8 secrets (voir `GITHUB_SECRETS.md`)
+2. Ajouter 6 secrets (voir `GITHUB_SECRETS.md`)
 3. Push le code
-4. **Le workflow s'exécute automatiquement** chaque jour à 08:00 + 16:00 UTC
+4. **Le workflow s'exécute automatiquement** chaque jour à 08:00 UTC
 
 Voir: `.github/workflows/healthcare-watch.yml`
 
@@ -245,7 +236,7 @@ Après le premier test réussi:
 ## 🎯 Votre checklist
 
 - [ ] Installation (Python + dépendances) ✅
-- [ ] Fichier `.env` créé avec 8 secrets
+- [ ] Fichier `.env` créé avec 6 secrets (Gmail API OAuth2)
 - [ ] Fichier `prompts.yaml` copié depuis template
 - [ ] Premier test réussi (pages Notion créées)
 - [ ] GitHub Actions configuré (optionnel)

@@ -32,12 +32,12 @@ Créer `.env` à la racine:
 PERPLEXITY_API_KEY=pplx-xxxxx
 NOTION_TOKEN=ntn_xxxxx
 NOTION_PARENT_PAGE_ID=xxxxx
-NOTIFICATION_EMAIL=your@email.com
-SMTP_SERVER=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USERNAME=your@email.com
-SMTP_PASSWORD=xxxx xxxx xxxx xxxx
+NOTIFICATION_EMAIL=your@gmail.com
+GOOGLE_CREDENTIALS_JSON={"installed":{"client_id":"...","client_secret":"...",...}}
+GOOGLE_OAUTH_TOKEN_JSON={"token":"...","refresh_token":"...","client_id":"...",...}
 ```
+
+**Note**: Pour Gmail API, voir [INSTALLATION.md](INSTALLATION.md) pour la configuration OAuth2 complète.
 
 ## 4️⃣ Configuration
 

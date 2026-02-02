@@ -46,47 +46,36 @@ Nom: NOTIFICATION_EMAIL
 Valeur: votre.email@gmail.com
 ```
 
-L'email pour recevoir les notifications.
+L'email Gmail pour recevoir les notifications.
 
-### 5. SMTP_SERVER
-
-```
-Nom: SMTP_SERVER
-Valeur: smtp.gmail.com
-```
-
-Pour Gmail: `smtp.gmail.com`
-Pour Outlook: `smtp-mail.outlook.com`
-
-### 6. SMTP_PORT
+### 5. GOOGLE_CREDENTIALS_JSON
 
 ```
-Nom: SMTP_PORT
-Valeur: 587
+Nom: GOOGLE_CREDENTIALS_JSON
+Valeur: {"installed":{"client_id":"...","project_id":"...","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","client_secret":"...",...}}
 ```
 
-Port SMTP standard: `587`
+⚠️ **Configuration:**
+1. Créer un projet dans Google Cloud Console: https://console.cloud.google.com/
+2. Activer Gmail API
+3. Créer des credentials OAuth 2.0 (type "Desktop app")
+4. Télécharger `credentials.json`
+5. Copier **tout le contenu JSON** du fichier dans ce secret
 
-### 7. SMTP_USERNAME
-
-```
-Nom: SMTP_USERNAME
-Valeur: votre.email@gmail.com
-```
-
-Doit correspondre à `NOTIFICATION_EMAIL`.
-
-### 8. SMTP_PASSWORD
+### 6. GOOGLE_OAUTH_TOKEN_JSON
 
 ```
-Nom: SMTP_PASSWORD
-Valeur: xxxx xxxx xxxx xxxx
+Nom: GOOGLE_OAUTH_TOKEN_JSON
+Valeur: {"token":"...","refresh_token":"...","token_uri":"https://oauth2.googleapis.com/token","client_id":"...","client_secret":"...","scopes":["https://www.googleapis.com/auth/gmail.send"],...}
 ```
 
-⚠️ **IMPORTANT pour Gmail:**
-- Générer un "App password": https://myaccount.google.com/apppasswords
-- Copier le mot de passe généré (16 caractères)
-- **NE PAS** utiliser votre mot de passe de compte
+⚠️ **Configuration:**
+1. Après avoir configuré credentials.json, exécuter un script d'autorisation OAuth2
+2. Un navigateur s'ouvrira pour autoriser l'application
+3. Le fichier `token.json` sera généré
+4. Copier **tout le contenu JSON** du fichier dans ce secret
+
+**Note**: Le token contient un `refresh_token` qui permet de renouveler automatiquement l'accès.
 
 ## ✅ Vérifier les secrets
 
@@ -125,7 +114,9 @@ Pour modifier les horaires, éditer `.github/workflows/healthcare-watch.yml`
 
 - Vérifier la valeur du secret
 - Copier-coller depuis la source (pas de caractères cachés)
-- Pour Gmail: Vérifier que l'App password est utilisé
+- Pour Gmail API: Vérifier que les JSON sont complets et valides
+- Vérifier que Gmail API est activée dans Google Cloud Console
+- Vérifier que le token OAuth2 contient un refresh_token
 
 ### Workflow ne s'exécute pas
 
