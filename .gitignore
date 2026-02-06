@@ -45,6 +45,7 @@ config/config.py
 # Output & Logs
 data/output/*.txt
 data/output/*.json
+!data/output/.last_run.json
 *.log
 
 # OS

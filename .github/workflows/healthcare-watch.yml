@@ -43,11 +43,14 @@ jobs:
           cd src/healthcare_watch
           python healthcare_watch.py
 
+      # 5. Commit les changements de suivi
       - name: Commit execution log
         if: always()
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+
+          # Ajouter les fichiers de suivi
           if [ -f "data/output/.last_run.json" ]; then
             git add data/output/.last_run.json
             git diff --cached --quiet || git commit -m "Update execution log - $(date -u +'%Y-%m-%d %H:%M UTC')"
